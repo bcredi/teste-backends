@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Solution.Domain;
 using Solution.Repository;
@@ -14,7 +14,7 @@ namespace SolutionApp
 
             for (var index = 0; index < 13; index++)
             {
-                var strIndex = index.ToString().PadLeft(3,'0');
+                var strIndex = index.ToString().PadLeft(3, '0');
                 var inputLines = File.ReadAllLines($"{basePath}/input/input{strIndex}.txt");
                 var outputLines = File.ReadAllLines($"{basePath}/output/output{strIndex}.txt");
 
