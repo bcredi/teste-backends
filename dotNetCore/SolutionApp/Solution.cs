@@ -9,9 +9,25 @@ using Solution.Domain.Events.Warranty;
 
 namespace SolutionApp
 {
-   public static class Solution
+   public class Solution
    {
 
+      private static Solution instance;
+      private readonly IProposalRepository _repo;
+
+      private Solution(IProposalRepository repository)
+      {
+         _repo = repository;
+      }
+
+      public static Solution Instance(IProposalRepository repository)
+      {
+         if (instance == null)
+         {
+            instance = new Solution(repository);
+         }
+         return instance;
+      }
       //   # Essa função recebe uma lista de mensagens, por exemplo:
       //   #
       //   # [
@@ -24,14 +40,15 @@ namespace SolutionApp
       //   # Complete a função para retornar uma string com os IDs das propostas válidas no seguinte formato (separado por vírgula):
       //   # "52f0b3f2-f838-4ce2-96ee-9876dd2c0cf6,51a41350-d105-4423-a9cf-5a24ac46ae84,50cedd7f-44fd-4651-a4ec-f55c742e3477"
 
-      public static string ProcessMessages(IEnumerable<string> messages)
+      public string ProcessMessages(IEnumerable<string> messages)
       {
          IDictionary<Guid, Proposal> proposals = new Dictionary<Guid, Proposal>();
 
-         foreach(var message in messages){
-            EventBase ev = Solution.Parse(message);
+         foreach (var message in messages)
+         {
+            EventBase ev = Parse(message);
             ev.Run();
-            var proposal = ev.Proposal;
+            var proposal = _repo.GetById(ev.ProposalId);
             proposals[proposal.Id] = proposal;
          }
 
@@ -39,13 +56,13 @@ namespace SolutionApp
             .Where(p => p.Value.IsValid())
             .Select(p => p.Key.ToString());
 
-         return string.Join(',',validProposals);
+         return string.Join(',', validProposals);
       }
 
-      public static EventBase Parse(string message)
+      public EventBase Parse(string message)
       {
          var messageData = message.Split(',');
-         switch(messageData[1])
+         switch (messageData[1])
          {
             case "proposal":
                return ProposalEventBuild(messageData);
@@ -54,52 +71,52 @@ namespace SolutionApp
             case "warranty":
                return WarrantyEventBuild(messageData);
             default:
-               throw new ArgumentException($"Message schema {messageData[1]} not found"); 
+               throw new ArgumentException($"Message schema {messageData[1]} not found");
          }
       }
 
-      private static EventBase WarrantyEventBuild(string[] messageData)
+      private EventBase WarrantyEventBuild(string[] messageData)
       {
-         switch(messageData[2])
+         switch (messageData[2])
          {
             case "added":
-               return new WarrantyAddedEvent(messageData);
+               return new WarrantyAddedEvent(_repo,messageData);
             case "updated":
-               return new WarrantyUpdatedEvent(messageData);
+               return new WarrantyUpdatedEvent(_repo,messageData);
             case "removed":
-               return new WarrantyRemovedEvent(messageData);
+               return new WarrantyRemovedEvent(_repo,messageData);
             default:
-               throw new ArgumentException($"Message action {messageData[2]} not found for schema {messageData[1]}"); 
+               throw new ArgumentException($"Message action {messageData[2]} not found for schema {messageData[1]}");
          }
       }
 
-      private static EventBase ProponentEventBuild(string[] messageData)
+      private EventBase ProponentEventBuild(string[] messageData)
       {
-         switch(messageData[2])
+         switch (messageData[2])
          {
             case "added":
-               return new ProponentAddedEvent(messageData);
+               return new ProponentAddedEvent(_repo,messageData);
             case "updated":
-               return new ProponentUpdatedEvent(messageData);
+               return new ProponentUpdatedEvent(_repo,messageData);
             case "removed":
-               return new ProponentRemovedEvent(messageData);
+               return new ProponentRemovedEvent(_repo,messageData);
             default:
-               throw new ArgumentException($"Message action {messageData[2]} not found for schema {messageData[1]}"); 
+               throw new ArgumentException($"Message action {messageData[2]} not found for schema {messageData[1]}");
          }
       }
 
-      private static EventBase ProposalEventBuild(string[] messageData)
+      private EventBase ProposalEventBuild(string[] messageData)
       {
-         switch(messageData[2])
+         switch (messageData[2])
          {
             case "created":
-               return new ProposalCreatedEvent(messageData);
+               return new ProposalCreatedEvent(_repo,messageData);
             case "updated":
-               return new ProposalUpdatedEvent(messageData);
+               return new ProposalUpdatedEvent(_repo,messageData);
             case "deleted":
-               return new ProposalDeletedEvent(messageData);
+               return new ProposalDeletedEvent(_repo,messageData);
             default:
-               throw new ArgumentException($"Message action {messageData[2]} not found for schema {messageData[1]}"); 
+               throw new ArgumentException($"Message action {messageData[2]} not found for schema {messageData[1]}");
          }
       }
    }

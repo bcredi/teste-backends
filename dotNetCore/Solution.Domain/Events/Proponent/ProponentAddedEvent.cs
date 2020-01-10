@@ -4,7 +4,7 @@ namespace Solution.Domain.Events.Proponent
 {
    public class ProponentAddedEvent : EventBase
    {
-      public ProponentAddedEvent(string[] messageData) : base(messageData)
+      public ProponentAddedEvent(IProposalRepository repo, string[] messageData) : base(repo, messageData)
       {
          ProponentId = Guid.Parse(messageData[5]);
          Name = messageData[6].Trim();
@@ -19,5 +19,8 @@ namespace Solution.Domain.Events.Proponent
       public decimal MonthlyIncome { get; set; }
       public bool IsMain { get; set; }
 
+      public override void Run()
+      {
+      }
    }
 }

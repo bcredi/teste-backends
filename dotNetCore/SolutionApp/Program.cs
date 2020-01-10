@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using Solution.Domain;
+using Solution.Repository;
 
 namespace SolutionApp
 {
@@ -7,7 +9,8 @@ namespace SolutionApp
     {
         static void Main(string[] args)
         {
-            string basePath = $"../test";
+            IProposalRepository repository = new ProposalRepository();
+            string basePath = $"../../test";
 
             for (var index = 0; index < 13; index++)
             {
@@ -15,7 +18,7 @@ namespace SolutionApp
                 var inputLines = File.ReadAllLines($"{basePath}/input/input{strIndex}.txt");
                 var outputLines = File.ReadAllLines($"{basePath}/output/output{strIndex}.txt");
 
-                var result = Solution.ProcessMessages(inputLines);
+                var result = Solution.Instance(repository).ProcessMessages(inputLines);
                 if (outputLines[0] == result)
                     Console.WriteLine($"Test #{index + 1}/#13 - Passed");
                 else
